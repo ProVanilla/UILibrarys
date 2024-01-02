@@ -1,0 +1,979 @@
+for _,v in pairs(game.CoreGui:GetChildren()) do
+	if v.Name == "AtomicUi" or v.Name == "AtomicNotification" or v.Name == "FlyGui" or v.Name  == "OpenButton" then
+		v:Destroy()
+	end
+end
+
+local uilib = {}
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local viewport = workspace.Camera.ViewportSize
+
+function MakeDraggable(topbarobject, object)
+	local Dragging = nil
+	local DragInput = nil
+	local DragStart = nil
+	local StartPosition = nil
+
+	local function Update(input)
+		local Delta = input.Position - DragStart
+		local pos = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + Delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + Delta.Y)
+		TweenService:Create(object, TweenInfo.new(0.15),{Position = pos}):Play()
+	end
+
+	topbarobject.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = true
+			DragStart = input.Position
+			StartPosition = object.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					Dragging = false
+				end
+			end)
+		end
+	end)
+
+	topbarobject.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			DragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if input == DragInput and Dragging then
+			Update(input)
+		end
+	end)
+end
+
+function uilib:MakeWindow(name , keybind)
+	local uihide = false
+	local abc = false
+	local currentpage = ""
+	local keybind = keybind
+	local yoo = string.gsub(tostring(keybind),"Enum.KeyCode.","")
+
+	local vanillaUi = Instance.new("ScreenGui")
+
+	local Frame = Instance.new("Frame")
+	local FrameCorner = Instance.new("UICorner")
+
+	local Tabs = Instance.new("Frame")
+	local TabsCorner = Instance.new("UICorner")
+	local TabsScrollingFrame = Instance.new("ScrollingFrame")
+	local UIListLayout = Instance.new("UIListLayout")
+	local TabsVanillaShadow = Instance.new("ImageLabel")
+	
+	local Line = Instance.new("Frame")
+	local LineCorner = Instance.new("UICorner")
+	local LineVanillaShadow = Instance.new("ImageLabel")
+	local UiName = Instance.new("TextLabel")
+	local UiNameGradient = Instance.new("UIGradient")
+	local DestroyButton = Instance.new("ImageButton")
+	local DestroyButtonGradient = Instance.new("UIGradient")
+	local CloseButton = Instance.new("ImageButton")
+	local CloseButtonGradient = Instance.new("UIGradient")
+
+	local Folder = Instance.new("Folder")
+
+	local TabName = Instance.new("TextLabel")
+	local UIGradient_2 = Instance.new("UIGradient")
+	
+	local UiIcon = Instance.new("ImageLabel")
+	
+	function ToggleImage(bool,Time)
+		if bool then
+			TweenService:Create(UiIcon,TweenInfo.new(Time),{ImageTransparency = 2}):Play()
+		else
+			TweenService:Create(UiIcon,TweenInfo.new(Time),{ImageTransparency = 0}):Play()
+		end
+	end
+	
+	vanillaUi.Name = "vanillaUi"
+	vanillaUi.Parent = game.CoreGui
+	vanillaUi.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	Frame.Parent = vanillaUi
+	Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Frame.BorderSizePixel = 0
+	Frame.Size = UDim2.new(0, 0, 0, 0)
+	Frame.ClipsDescendants = true
+	Frame.AnchorPoint = Vector2.new(0.5,0.5)
+	Frame.Position = UDim2.fromOffset((viewport.X/2) - (Frame.Size.X.Offset / 2), (viewport.Y/2) - (Frame.Size.Y.Offset / 2));
+
+	Frame:TweenSize(UDim2.new(0, 515, 0, 365),"Out","Quad",0.3,true)
+	wait(0.5)
+
+	FrameCorner.CornerRadius = UDim.new(0, 5)
+	FrameCorner.Name = "FrameCorner"
+	FrameCorner.Parent = Frame
+
+	Tabs.Name = "Tabs"
+	Tabs.Parent = Frame
+	Tabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Tabs.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Tabs.BorderSizePixel = 0
+	Tabs.Size = UDim2.new(0, 50, 0, 365)
+
+	TabsCorner.CornerRadius = UDim.new(0, 5)
+	TabsCorner.Name = "TabsCorner"
+	TabsCorner.Parent = Tabs
+
+	TabsScrollingFrame.Name = "TabsScrollingFrame"
+	TabsScrollingFrame.Parent = Tabs
+	TabsScrollingFrame.Active = true
+	TabsScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TabsScrollingFrame.BackgroundTransparency = 2.000
+	TabsScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TabsScrollingFrame.BorderSizePixel = 0
+	TabsScrollingFrame.Position = UDim2.new(0, 0, 0.169863015, 0)
+	TabsScrollingFrame.Size = UDim2.new(0, 50, 0, 242)
+	TabsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+	TabsScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+	TabsScrollingFrame.ScrollBarThickness = 0
+	
+	UIListLayout.Parent = TabsScrollingFrame
+	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	UIListLayout.Padding = UDim.new(0, 13)
+
+	TabsVanillaShadow.Name = "TabsVanillaShadow"
+	TabsVanillaShadow.Parent = Tabs
+	TabsVanillaShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+	TabsVanillaShadow.BackgroundTransparency = 1.000
+	TabsVanillaShadow.BorderSizePixel = 0
+	TabsVanillaShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+	TabsVanillaShadow.Size = UDim2.new(1, 47, 1, 47)
+	TabsVanillaShadow.ZIndex = 0
+	TabsVanillaShadow.Image = "rbxassetid://6015897843"
+	TabsVanillaShadow.ImageColor3 = Color3.fromRGB(255, 255, 0)
+	TabsVanillaShadow.ImageTransparency = 0.820
+	TabsVanillaShadow.ScaleType = Enum.ScaleType.Slice
+	TabsVanillaShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+
+
+	Line.Name = "Line"
+	Line.Parent = Frame
+	Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Line.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Line.BorderSizePixel = 0
+	Line.Size = UDim2.new(0, 515, 0, 50)
+
+	LineCorner.CornerRadius = UDim.new(0, 5)
+	LineCorner.Name = "LineCorner"
+	LineCorner.Parent = Line
+
+	LineVanillaShadow.Name = "LineVanillaShadow"
+	LineVanillaShadow.Parent = Line
+	LineVanillaShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+	LineVanillaShadow.BackgroundTransparency = 1.000
+	LineVanillaShadow.BorderSizePixel = 0
+	LineVanillaShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+	LineVanillaShadow.Size = UDim2.new(1, 47, 1, 47)
+	LineVanillaShadow.ZIndex = 0
+	LineVanillaShadow.Image = "rbxassetid://6015897843"
+	LineVanillaShadow.ImageColor3 = Color3.fromRGB(255, 255, 0)
+	LineVanillaShadow.ImageTransparency = 0.820
+	LineVanillaShadow.ScaleType = Enum.ScaleType.Slice
+	LineVanillaShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+	
+	UiIcon.Name = "UiIcon"
+	UiIcon.Parent = Frame
+	UiIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	UiIcon.BackgroundTransparency = 2.000
+	UiIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	UiIcon.BorderSizePixel = 0
+	UiIcon.Position = UDim2.new(-0.0619740896, 0, -0.097260274, 0)
+	UiIcon.Rotation = -30.000
+	UiIcon.Size = UDim2.new(0, 74, 0, 64)
+	UiIcon.Image = "http://www.roblox.com/asset/?id=15831938694"
+
+	UiName.Name = "UiName"
+	UiName.Parent = Line
+	UiName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	UiName.BackgroundTransparency = 2.000
+	UiName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	UiName.BorderSizePixel = 0
+	UiName.Position = UDim2.new(0.0349514559, 0, 0, 0)
+	UiName.Size = UDim2.new(0, 391, 0, 50)
+	UiName.Font = Enum.Font.GothamBold
+	UiName.Text = name
+	UiName.TextColor3 = Color3.fromRGB(255, 255, 255)
+	UiName.TextSize = 21.000
+	UiName.TextXAlignment = Enum.TextXAlignment.Left
+
+	UiNameGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+	UiNameGradient.Name = "UiNameGradient"
+	UiNameGradient.Parent = UiName
+
+	DestroyButton.Name = "DestroyButton"
+	DestroyButton.Parent = Line
+	DestroyButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	DestroyButton.BackgroundTransparency = 2.000
+	DestroyButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	DestroyButton.BorderSizePixel = 0
+	DestroyButton.Position = UDim2.new(0.932038844, 0, 0.25999999, 0)
+	DestroyButton.Size = UDim2.new(0, 23, 0, 23)
+	DestroyButton.Image = "rbxassetid://11293981586"
+	DestroyButton.MouseButton1Click:Connect(function()
+		ToggleImage(true,0.3)
+		wait(0.3)
+		Frame:TweenSize(UDim2.new(0, 0, 0, 0),"InOut","Quad",0.3,true)
+		wait(1)
+		vanillaUi:Destroy()
+	end)
+
+	DestroyButtonGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+	DestroyButtonGradient.Name = "DestroyButtonGradient"
+	DestroyButtonGradient.Parent = DestroyButton
+
+	CloseButton.Name = "CloseButton"
+	CloseButton.Parent = Line
+	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.BackgroundTransparency = 2.000
+	CloseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	CloseButton.BorderSizePixel = 0
+	CloseButton.Position = UDim2.new(0.842718422, 0, 0.25999999, 0)
+	CloseButton.Size = UDim2.new(0, 23, 0, 23)
+	CloseButton.Image = "rbxassetid://11293980042"
+	CloseButton.MouseButton1Click:Connect(function()
+		ToggleImage(true,0.3)
+		wait(0.3)
+		Frame:TweenSize(UDim2.new(0, 0, 0, 0),"InOut","Quad",0.3,true)
+		local OpenGui = Instance.new("ScreenGui")
+		local ImageButton = Instance.new("ImageButton")
+
+		OpenGui.Name = "OpenGui"
+		OpenGui.Parent = game.CoreGui
+		OpenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+		ImageButton.Parent = OpenGui
+		ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ImageButton.BackgroundTransparency = 2.000
+		ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		ImageButton.BorderSizePixel = 0
+		ImageButton.Position = UDim2.fromOffset((viewport.X/2) - (ImageButton.Size.X.Offset / 2), (viewport.Y/2) - (ImageButton.Size.Y.Offset / 2));
+		ImageButton.Size = UDim2.new(0, 40, 0, 40)
+		ImageButton.Image = "http://www.roblox.com/asset/?id=15831938694"
+		ImageButton.ImageTransparency = 1.000
+		ImageButton.MouseButton1Click:Connect(function()
+			TweenService:Create(ImageButton,TweenInfo.new(1),{ImageTransparency = 2}):Play()
+			Frame:TweenSize(UDim2.new(0, 515, 0, 365),"Out","Quad",0.3,true)
+			wait(0.2)
+			ToggleImage(false,0.3)
+			wait(1)
+			OpenGui:Destroy()
+		end)
+		wait(1)
+		TweenService:Create(ImageButton,TweenInfo.new(1),{ImageTransparency = 0}):Play()
+		
+		MakeDraggable(ImageButton,ImageButton)
+	end)
+	
+	CloseButtonGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+	CloseButtonGradient.Name = "CloseButtonGradient"
+	CloseButtonGradient.Parent = CloseButton
+
+	Folder.Parent = Frame
+	
+	TabName.Name = "TabName"
+	TabName.Parent = Frame
+	TabName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TabName.BackgroundTransparency = 2.000
+	TabName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TabName.BorderSizePixel = 0
+	TabName.Position = UDim2.new(0.145631045, 0, 0.169863015, 0)
+	TabName.Size = UDim2.new(0, 426, 0, 29)
+	TabName.Font = Enum.Font.GothamBold
+	TabName.Text = ""
+	TabName.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TabName.TextSize = 19.000
+	TabName.TextXAlignment = Enum.TextXAlignment.Left
+
+	UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+	UIGradient_2.Parent = TabName
+
+	local UIPageLayout = Instance.new("UIPageLayout")
+	UIPageLayout.Parent = Folder
+	UIPageLayout.FillDirection = Enum.FillDirection.Vertical
+	UIPageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	UIPageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	UIPageLayout.EasingDirection = Enum.EasingDirection.InOut
+	UIPageLayout.EasingStyle = Enum.EasingStyle.Exponential
+	UIPageLayout.GamepadInputEnabled = false
+	UIPageLayout.Padding = UDim.new(0, 10)
+	UIPageLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	UIPageLayout.ScrollWheelInputEnabled = true
+	UIPageLayout.TouchInputEnabled = false
+	UIPageLayout.TweenTime = 0.4
+	
+	UserInputService.InputBegan:Connect(function(input)
+		if game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("OpenGui") then
+			return
+		else
+			if input.KeyCode == Enum.KeyCode.RightControl then
+				if uihide == false then
+					uihide = true
+					ToggleImage(true,0.3)
+					Frame:TweenSize(UDim2.new(0, 0, 0, 0),"In","Quad",0.3,true)
+				else
+					uihide = false
+					Frame:TweenSize(UDim2.new(0, 515, 0, 365),"Out","Quad",0.3,true)
+					wait(0.2)
+					ToggleImage(false,0.3)
+				end
+			end
+		end
+	end)
+	
+	MakeDraggable(Line,Frame)
+	local uilib_tab = {}
+	function uilib_tab:MakeTab(name,icon)
+		local PageScrollingFrame = Instance.new("ScrollingFrame")
+		local PageListLayout = Instance.new("UIListLayout")
+		local FixFrame = Instance.new("Frame")
+		local TabButton = Instance.new("TextButton")
+		local TabButtonGradient = Instance.new("UIGradient")
+		local TabButtonCorner = Instance.new("UICorner")
+		local ButtonIcon = Instance.new("ImageLabel")
+		
+		PageScrollingFrame.Name = name.."_Page"
+		PageScrollingFrame.Parent = Folder
+		PageScrollingFrame.Active = true
+		PageScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		PageScrollingFrame.BackgroundTransparency = 2.000
+		PageScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		PageScrollingFrame.BorderSizePixel = 0
+		PageScrollingFrame.Visible = true
+		PageScrollingFrame.Position = UDim2.new(0, 0, 0, 0)
+		PageScrollingFrame.Size = UDim2.new(0, 458,0, 260)
+		PageScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 252, 161)
+		PageScrollingFrame.ScrollBarThickness = 5
+		PageScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+		
+		local UIPadding = Instance.new("UIPadding")
+
+		UIPadding.Parent = PageScrollingFrame
+		UIPadding.PaddingLeft = UDim.new(0, 20)
+		UIPadding.PaddingTop = UDim.new(0, 0)
+
+		PageListLayout.Name = "PageListLayout"
+		PageListLayout.Parent = PageScrollingFrame
+		PageListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		PageListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		PageListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		PageListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+		PageListLayout.Padding = UDim.new(0, 10)
+
+		FixFrame.Name = "FixFrame"
+		FixFrame.Parent = PageScrollingFrame
+		FixFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		FixFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		FixFrame.BorderSizePixel = 0
+		FixFrame.Position = UDim2.new(0.015625, 0, 0, 0)
+		FixFrame.Size = UDim2.new(0, 434, 0, 0)
+		TabsScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+		
+		TabButton.Name = name.."Server"
+		TabButton.Parent = TabsScrollingFrame
+		TabButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TabButton.BackgroundTransparency = 2
+		
+		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		TabButton.BorderSizePixel = 0
+		TabButton.Position = UDim2.new(0.100000001, 0, 0, 0)
+		TabButton.Size = UDim2.new(0, 35, 0, 35)
+		TabButton.AutoButtonColor = false
+		TabButton.Font = Enum.Font.SourceSans
+		TabButton.Text = ""
+		TabButton.TextTransparency = 2.00
+		TabButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+		TabButton.TextSize = 14.000
+
+		TabButtonGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+		TabButtonGradient.Name = "TabButtonGradient"
+		TabButtonGradient.Parent = TabButton
+
+		TabButtonCorner.CornerRadius = UDim.new(0, 5)
+		TabButtonCorner.Name = "TabButtonCorner"
+		TabButtonCorner.Parent = TabButton
+
+		ButtonIcon.Name = "ButtonIcon"
+		ButtonIcon.Parent = TabButton
+		ButtonIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ButtonIcon.BackgroundTransparency = 2.000
+		ButtonIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		ButtonIcon.BorderSizePixel = 0
+		ButtonIcon.Size = UDim2.new(0, 35, 0, 35)
+		ButtonIcon.Image = "rbxassetid://"..icon
+		ButtonIcon.ImageTransparency = 2
+		
+		
+		TabButton.MouseButton1Click:Connect(function()
+			if TabName.Text == "• "..name then
+				return
+			else
+				for i,v in next, TabsScrollingFrame:GetChildren() do
+					if v:IsA("TextButton") then
+						v:TweenSize(UDim2.new(0, 35, 0, 35),"In","Quad",0.1,true)
+						v.ButtonIcon:TweenSize(UDim2.new(0, 35, 0, 35),"In","Quad",0.1,true)
+					end
+					TabButton:TweenSize(UDim2.new(0, 40, 0, 40),"In","Quad",0.1,true)
+					ButtonIcon:TweenSize(UDim2.new(0, 40, 0, 40),"In","Quad",0.1,true)
+
+				end
+
+				for i,v in next, Folder:GetChildren() do
+					currentpage = string.gsub(TabButton.Name,"Server","").."_Page"
+					if v.Name == currentpage then
+						UIPageLayout:JumpTo(v)
+					end
+				end
+				TweenService:Create(TabName,TweenInfo.new(0.4),{TextTransparency = 2.00}):Play()
+				wait(0.4)
+				TabName.Text = "• "..name
+				TweenService:Create(TabName,TweenInfo.new(0.4),{TextTransparency = 0.00}):Play()
+			end
+		end)
+		
+		for i,v in next, TabsScrollingFrame:GetChildren() do
+			if v:IsA("TextButton") then
+				TweenService:Create(v.ButtonIcon,TweenInfo.new(0.4),{ImageTransparency = 0}):Play()
+				TweenService:Create(v,TweenInfo.new(0.4),{BackgroundTransparency = 0}):Play()
+			end
+		end
+
+		if abc == false then
+			for i,v in next, TabsScrollingFrame:GetChildren() do
+				if v:IsA("TextButton") then
+					v:TweenSize(UDim2.new(0, 35, 0, 35),"In","Quad",0.1,true)
+					v.ButtonIcon:TweenSize(UDim2.new(0, 35, 0, 35),"In","Quad",0.1,true)
+					ButtonIcon:TweenSize(UDim2.new(0, 40, 0, 40),"In","Quad",0.1,true)
+					TabButton:TweenSize(UDim2.new(0, 40, 0, 40),"In","Quad",0.1,true)
+				end
+				wait(0.4)
+				UIPageLayout:JumpToIndex(1)
+				TabName.Text = "• "..name
+				TweenService:Create(TabName,TweenInfo.new(0.4),{TextTransparency = 0.00}):Play()
+			end
+			abc = true
+		end
+		
+		game:GetService("RunService").Stepped:Connect(function()
+			pcall(function()
+				PageScrollingFrame.CanvasSize = UDim2.new(0,0,0,PageListLayout.AbsoluteContentSize.Y + 20)
+				TabsScrollingFrame.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y + 20)
+			end)
+		end)
+
+		local uilib_page = {}
+		function uilib_page:MakeButton(name,callback)
+			local ButtonFrame = Instance.new("Frame")
+			local ButtonCorner = Instance.new("UICorner")
+			local ButtonStroke = Instance.new("UIStroke")
+			local ButtonStrokeGradient = Instance.new("UIGradient")
+			local ButtonGradient = Instance.new("UIGradient")
+			local TextButton = Instance.new("TextButton")
+			local TextButtonGradient = Instance.new("UIGradient")
+			local ButtonIcon_2 = Instance.new("ImageLabel")
+			local ButtonIconGradient = Instance.new("UIGradient")
+			local callback = callback or function () end
+			local button_func = {}
+			
+			ButtonFrame.Name = "ButtonFrame"
+			ButtonFrame.Parent = PageScrollingFrame
+			ButtonFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ButtonFrame.BackgroundTransparency = 0.900
+			ButtonFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			ButtonFrame.BorderSizePixel = 0
+			ButtonFrame.Position = UDim2.new(0.0345982127, 0, 0.0238907859, 0)
+			ButtonFrame.Size = UDim2.new(0, 417, 0, 41)
+
+			ButtonCorner.Name = "ButtonCorner"
+			ButtonCorner.Parent = ButtonFrame
+
+			ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+			ButtonStroke.Name = "ButtonStroke"
+			ButtonStroke.Parent = ButtonFrame
+
+			ButtonStrokeGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			ButtonStrokeGradient.Name = "ButtonStrokeGradient"
+			ButtonStrokeGradient.Parent = ButtonStroke
+
+			ButtonGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
+			ButtonGradient.Name = "ButtonGradient"
+			ButtonGradient.Parent = ButtonFrame
+
+			TextButton.Parent = ButtonFrame
+			TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			TextButton.BackgroundTransparency = 2.000
+			TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextButton.BorderSizePixel = 0
+			TextButton.Position = UDim2.new(0.0311750602, 0, 0, 0)
+			TextButton.Size = UDim2.new(0, 404, 0, 41)
+			TextButton.Font = Enum.Font.GothamBold
+			TextButton.Text = name
+			TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			TextButton.TextSize = 14.000
+			TextButton.TextXAlignment = Enum.TextXAlignment.Left
+
+			TextButtonGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			TextButtonGradient.Name = "TextButtonGradient"
+			TextButtonGradient.Parent = TextButton
+
+			ButtonIcon_2.Name = "ButtonIcon"
+			ButtonIcon_2.Parent = ButtonFrame
+			ButtonIcon_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ButtonIcon_2.BackgroundTransparency = 2.000
+			ButtonIcon_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			ButtonIcon_2.BorderSizePixel = 0
+			ButtonIcon_2.Position = UDim2.new(0.908872902, 0, 0.195121944, 0)
+			ButtonIcon_2.Size = UDim2.new(0, 25, 0, 25)
+			ButtonIcon_2.Image = "rbxassetid://11432848110"
+			ButtonIconGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			ButtonIconGradient.Name = "ButtonIconGradient"
+			ButtonIconGradient.Parent = ButtonIcon_2
+			PageScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, PageListLayout.AbsoluteContentSize.Y)
+
+			TextButton.MouseEnter:Connect(function()
+				TweenService:Create(ButtonIcon_2,TweenInfo.new(0.25),{Rotation = -30}):Play()
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.50}):Play()
+			end)
+			
+			TextButton.MouseLeave:Connect(function()
+				TweenService:Create(ButtonIcon_2,TweenInfo.new(0.25),{Rotation = 0}):Play()
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 2.00}):Play()
+			end)
+
+			TextButton.MouseButton1Click:Connect(function()
+				pcall(callback)
+				TweenService:Create(ButtonIcon_2,TweenInfo.new(0.25),{Rotation = 360}):Play()
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.20}):Play()
+				wait(0.25)
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.50}):Play()
+			end)
+			
+			function button_func:Run()
+				pcall(callback)
+				TweenService:Create(ButtonIcon_2,TweenInfo.new(0.25),{Rotation = 360}):Play()
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.20}):Play()
+				wait(0.25)
+				TweenService:Create(ButtonFrame,TweenInfo.new(0.25),{BackgroundTransparency = 2.00}):Play()
+			end
+			return button_func
+		end
+		
+		function uilib_page:MakeToggle(name,bool,callback)
+			local ToggleFrame = Instance.new("Frame")
+			local ToggleCorner = Instance.new("UICorner")
+			local ToggleStroke = Instance.new("UIStroke")
+			local ToggleStrokeGradient = Instance.new("UIGradient")
+			local ToggleGradient = Instance.new("UIGradient")
+			local TextToggleButton = Instance.new("TextButton")
+			local TextToggleGradient = Instance.new("UIGradient")
+			local ToggleIcon = Instance.new("ImageLabel")
+			local ToggleIconGradient = Instance.new("UIGradient")
+			local ToggleIconCorner = Instance.new("UICorner")
+			local ToggleIconStroke = Instance.new("UIStroke")
+			local ToggleIconGradient_2 = Instance.new("UIGradient")
+			local callback = callback or function () end
+			local ToggleEnabled = bool or false
+			local Toggle_func = {}
+			
+			ToggleFrame.Name = "ToggleFrame"
+			ToggleFrame.Parent = PageScrollingFrame
+			ToggleFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleFrame.BackgroundTransparency = 0.900
+			ToggleFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			ToggleFrame.BorderSizePixel = 0
+			ToggleFrame.Position = UDim2.new(0.0345982127, 0, 0.0238907859, 0)
+			ToggleFrame.Size = UDim2.new(0, 417, 0, 41)
+
+			ToggleCorner.Name = "ToggleCorner"
+			ToggleCorner.Parent = ToggleFrame
+
+			ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+			ToggleStroke.Name = "ToggleStroke"
+			ToggleStroke.Parent = ToggleFrame
+
+			ToggleStrokeGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			ToggleStrokeGradient.Name = "ToggleStrokeGradient"
+			ToggleStrokeGradient.Parent = ToggleStroke
+
+			ToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
+			ToggleGradient.Name = "ToggleGradient"
+			ToggleGradient.Parent = ToggleFrame
+
+			TextToggleButton.Name = "TextToggleButton"
+			TextToggleButton.Parent = ToggleFrame
+			TextToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			TextToggleButton.BackgroundTransparency = 2.000
+			TextToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextToggleButton.BorderSizePixel = 0
+			TextToggleButton.Position = UDim2.new(0.0311750602, 0, 0, 0)
+			TextToggleButton.Size = UDim2.new(0, 404, 0, 41)
+			TextToggleButton.Font = Enum.Font.GothamBold
+			TextToggleButton.Text = name
+			TextToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			TextToggleButton.TextSize = 14.000
+			TextToggleButton.TextXAlignment = Enum.TextXAlignment.Left
+
+			TextToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			TextToggleGradient.Name = "TextToggleGradient"
+			TextToggleGradient.Parent = TextToggleButton
+
+			ToggleIcon.Name = "ToggleIcon"
+			ToggleIcon.Parent = ToggleFrame
+			ToggleIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleIcon.BackgroundTransparency = 2.000
+			ToggleIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			ToggleIcon.BorderSizePixel = 0
+			ToggleIcon.Position = UDim2.new(0.908872902, 0, 0.195121944, 0)
+			ToggleIcon.Size = UDim2.new(0, 25, 0, 25)
+			ToggleIcon.ImageColor3 = Color3.fromRGB(207, 190, 6)
+			
+			ToggleIconGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			ToggleIconGradient.Name = "ToggleIconGradient"
+			ToggleIconGradient.Parent = ToggleIcon
+			ToggleIconCorner.CornerRadius = UDim.new(0, 5)
+			ToggleIconCorner.Name = "ToggleIconCorner"
+			ToggleIconCorner.Parent = ToggleIcon
+
+			ToggleIconStroke.Color = Color3.fromRGB(255, 255, 255)
+			ToggleIconStroke.Name = "ToggleIconStroke"
+			ToggleIconStroke.Parent = ToggleIcon
+
+			ToggleIconGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			ToggleIconGradient_2.Name = "ToggleIconGradient"
+			ToggleIconGradient_2.Parent = ToggleIconStroke
+			PageScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, PageListLayout.AbsoluteContentSize.Y)
+
+			ToggleFrame.MouseEnter:Connect(function()
+				TweenService:Create(ToggleIconGradient,TweenInfo.new(0.25),{Rotation = 10}):Play()
+				ToggleIcon:TweenSize(UDim2.new(0, 30, 0, 30),"InOut","Quad",0.25,true)
+				TweenService:Create(ToggleFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.50}):Play()
+			end)
+
+			ToggleFrame.MouseLeave:Connect(function()
+				TweenService:Create(ToggleIconGradient,TweenInfo.new(0.25),{Rotation = 0}):Play()
+				ToggleIcon:TweenSize(UDim2.new(0, 25, 0, 25),"InOut","Quad",0.25,true)
+				TweenService:Create(ToggleFrame,TweenInfo.new(0.25),{BackgroundTransparency = 2.00}):Play()
+			end)
+
+			TextToggleButton.MouseButton1Click:Connect(function()
+				ToggleEnabled = not ToggleEnabled
+				if ToggleEnabled then
+					TweenService:Create(ToggleIcon,TweenInfo.new(0.25),{BackgroundTransparency = 0.000}):Play()
+				else
+					TweenService:Create(ToggleIcon,TweenInfo.new(0.25),{BackgroundTransparency = 2.000}):Play()
+				end
+				pcall(callback,ToggleEnabled)
+			end)
+			
+			function Toggle_func:Set(bool)
+				ToggleEnabled = bool
+				if ToggleEnabled then
+					TweenService:Create(ToggleIcon,TweenInfo.new(0.25),{BackgroundTransparency = 0.000}):Play()
+				else
+					TweenService:Create(ToggleIcon,TweenInfo.new(0.25),{BackgroundTransparency = 2.000}):Play()
+				end
+				pcall(callback,ToggleEnabled)
+				
+			end
+			return Toggle_func
+		end
+		
+		function uilib_page:MakeTextbox(name,txt,callback)
+			local TextBoxFrame = Instance.new("Frame")
+			local TextBoxFrameCorner = Instance.new("UICorner")
+			local TextBoxFrameStroke = Instance.new("UIStroke")
+			local TextBoxFrameStrokeGradient = Instance.new("UIGradient")
+			local TextBoxFrameGradient = Instance.new("UIGradient")
+			local TextBoxLabel = Instance.new("TextLabel")
+			local TextBoxLabelGradient = Instance.new("UIGradient")
+			local TextBox = Instance.new("TextBox")
+			local TextBoxStroke = Instance.new("UIStroke")
+			local TextBoxStrokeGradient = Instance.new("UIGradient")
+			local TextBoxCorner = Instance.new("UICorner")
+			local callback = callback or function () end
+			
+			TextBoxFrame.Name = "TextBoxFrame"
+			TextBoxFrame.Parent = PageScrollingFrame
+			TextBoxFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			TextBoxFrame.BackgroundTransparency = 0.900
+			TextBoxFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextBoxFrame.BorderSizePixel = 0
+			TextBoxFrame.Position = UDim2.new(0.0345982127, 0, 0.351535827, 0)
+			TextBoxFrame.Size = UDim2.new(0, 417, 0, 57)
+
+			TextBoxFrameCorner.Name = "TextBoxFrameCorner"
+			TextBoxFrameCorner.Parent = TextBoxFrame
+
+			TextBoxFrameStroke.Color = Color3.fromRGB(255, 255, 255)
+			TextBoxFrameStroke.Name = "TextBoxFrameStroke"
+			TextBoxFrameStroke.Parent = TextBoxFrame
+
+			TextBoxFrameStrokeGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			TextBoxFrameStrokeGradient.Name = "TextBoxFrameStrokeGradient"
+			TextBoxFrameStrokeGradient.Parent = TextBoxFrameStroke
+
+			TextBoxFrameGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
+			TextBoxFrameGradient.Name = "TextBoxFrameGradient"
+			TextBoxFrameGradient.Parent = TextBoxFrame
+
+			TextBoxLabel.Name = "TextBoxLabel"
+			TextBoxLabel.Parent = TextBoxFrame
+			TextBoxLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			TextBoxLabel.BackgroundTransparency = 2.000
+			TextBoxLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextBoxLabel.BorderSizePixel = 0
+			TextBoxLabel.Position = UDim2.new(0.0311750602, 0, 0.192768291, 0)
+			TextBoxLabel.Size = UDim2.new(0, 206, 0, 35)
+			TextBoxLabel.Font = Enum.Font.GothamBold
+			TextBoxLabel.Text = name
+			TextBoxLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			TextBoxLabel.TextSize = 14.000
+			TextBoxLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+			TextBoxLabelGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			TextBoxLabelGradient.Name = "TextBoxLabelGradient"
+			TextBoxLabelGradient.Parent = TextBoxLabel
+
+			TextBox.Parent = TextBoxFrame
+			TextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+			TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextBox.BorderSizePixel = 0
+			TextBox.Position = UDim2.new(0.465227813, 0, 0.122592859, 0)
+			TextBox.Size = UDim2.new(0, 200, 0, 42)
+			TextBox.Font = Enum.Font.GothamBold
+			TextBox.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+			TextBox.Text = txt
+			TextBox.TextColor3 = Color3.fromRGB(218, 193, 95)
+			TextBox.TextSize = 16.000
+
+			TextBoxStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			TextBoxStroke.Color = Color3.fromRGB(255, 255, 255)
+			TextBoxStroke.Name = "TextBoxStroke"
+			TextBoxStroke.Parent = TextBox
+
+			TextBoxStrokeGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			TextBoxStrokeGradient.Name = "TextBoxStrokeGradient"
+			TextBoxStrokeGradient.Parent = TextBoxStroke
+
+			TextBoxCorner.CornerRadius = UDim.new(0, 6)
+			TextBoxCorner.Name = "TextBoxCorner"
+			TextBoxCorner.Parent = TextBox
+			PageScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, PageListLayout.AbsoluteContentSize.Y)
+
+
+			TextBox.Focused:Connect(function()
+				TweenService:Create(TextBox,TweenInfo.new(0.25),{TextSize = 20}):Play()
+				TweenService:Create(TextBoxFrame,TweenInfo.new(0.25),{BackgroundTransparency = 0.70}):Play()
+			end)
+			
+			TextBox.FocusLost:Connect(function()
+				TweenService:Create(TextBox,TweenInfo.new(0.10),{TextSize = 16}):Play()
+				TweenService:Create(TextBoxFrame,TweenInfo.new(0.10),{BackgroundTransparency = 2}):Play()
+				callback(TextBox.Text)
+				TweenService:Create(TextBox,TweenInfo.new(0.10),{TextTransparency = 2}):Play()
+				wait(0.10)
+				TextBox.Text = txt
+				TweenService:Create(TextBox,TweenInfo.new(0.10),{TextTransparency = 0}):Play()
+			end)
+
+		end
+		
+		function uilib_page:MakeSlider(name,min,max,start,callback)
+			local SliderFunc = {}
+			local dragging = false
+
+			local SliderFrame = Instance.new("Frame")
+			local SliderFrameCorner = Instance.new("UICorner")
+			local SliderFrameStroke = Instance.new("UIStroke")
+			local TextBoxFrameStrokeGradient_2 = Instance.new("UIGradient")
+			local SliderFrameGradient = Instance.new("UIGradient")
+			local SliderFrameLabel = Instance.new("TextLabel")
+			local TextBoxLabelGradient_2 = Instance.new("UIGradient")
+			local SliderButton = Instance.new("TextButton")
+			local SliderFrameStroke_2 = Instance.new("UIStroke")
+			local TextBoxFrameStrokeGradient_3 = Instance.new("UIGradient")
+			local SliderFrameCorner_2 = Instance.new("UICorner")
+			local SliderLine = Instance.new("Frame")
+			local SliderFrameCorner_3 = Instance.new("UICorner")
+			local UIGradient = Instance.new("UIGradient")
+			local SliderNumber = Instance.new("TextLabel")
+			local TextBoxLabelGradient_4 = Instance.new("UIGradient")
+
+			SliderFrame.Name = "SliderFrame"
+			SliderFrame.Parent = PageScrollingFrame
+			SliderFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderFrame.BackgroundTransparency = 0.900
+			SliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderFrame.BorderSizePixel = 0
+			SliderFrame.Position = UDim2.new(0.0345982127, 0, 0.351535827, 0)
+			SliderFrame.Size = UDim2.new(0, 417, 0, 57)
+
+			SliderFrameCorner.Name = "SliderFrameCorner"
+			SliderFrameCorner.Parent = SliderFrame
+
+			SliderFrameStroke.Color = Color3.fromRGB(255, 255, 255)
+			SliderFrameStroke.Name = "SliderFrameStroke"
+			SliderFrameStroke.Parent = SliderFrame
+
+			TextBoxFrameStrokeGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			TextBoxFrameStrokeGradient_2.Name = "TextBoxFrameStrokeGradient"
+			TextBoxFrameStrokeGradient_2.Parent = SliderFrameStroke
+
+			SliderFrameGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
+			SliderFrameGradient.Name = "SliderFrameGradient"
+			SliderFrameGradient.Parent = SliderFrame
+
+			SliderFrameLabel.Name = "SliderFrameLabel"
+			SliderFrameLabel.Parent = SliderFrame
+			SliderFrameLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderFrameLabel.BackgroundTransparency = 2.000
+			SliderFrameLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderFrameLabel.BorderSizePixel = 0
+			SliderFrameLabel.Position = UDim2.new(0.0311750602, 0, 0.122592859, 0)
+			SliderFrameLabel.Size = UDim2.new(0, 391, 0, 22)
+			SliderFrameLabel.Font = Enum.Font.GothamBold
+			SliderFrameLabel.Text = "Slider "
+			SliderFrameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			SliderFrameLabel.TextSize = 14.000
+			SliderFrameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+			TextBoxLabelGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			TextBoxLabelGradient_2.Name = "TextBoxLabelGradient"
+			TextBoxLabelGradient_2.Parent = SliderFrameLabel
+
+			SliderButton.Name = "SliderButton"
+			SliderButton.Parent = SliderFrame
+			SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderButton.BorderSizePixel = 0
+			SliderButton.Position = UDim2.new(0.0311750975, 0, 0.61403507, 0)
+			SliderButton.Size = UDim2.new(0, 390, 0, 14)
+			SliderButton.AutoButtonColor = false
+			SliderButton.Font = Enum.Font.SourceSans
+			SliderButton.Text = ""
+			SliderButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+			SliderButton.TextSize = 14.000
+
+			SliderFrameStroke_2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			SliderFrameStroke_2.Color = Color3.fromRGB(255, 255, 255)
+			SliderFrameStroke_2.Name = "SliderFrameStroke"
+			SliderFrameStroke_2.Parent = SliderButton
+
+			TextBoxFrameStrokeGradient_3.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 175, 137)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(252, 252, 252))}
+			TextBoxFrameStrokeGradient_3.Name = "TextBoxFrameStrokeGradient"
+			TextBoxFrameStrokeGradient_3.Parent = SliderFrameStroke_2
+
+			SliderFrameCorner_2.Name = "SliderFrameCorner"
+			SliderFrameCorner_2.Parent = SliderButton
+
+			SliderLine.Name = "SliderLine"
+			SliderLine.Parent = SliderButton
+			SliderLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderLine.BorderSizePixel = 0
+			SliderLine.Size = UDim2.new((start or 0)/max, -6,0, 14)
+
+
+			SliderFrameCorner_3.Name = "SliderFrameCorner"
+			SliderFrameCorner_3.Parent = SliderLine
+
+			UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			UIGradient.Parent = SliderLine
+
+
+			SliderNumber.Name = "SliderNumber"
+			SliderNumber.Parent = SliderFrame
+			SliderNumber.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderNumber.BackgroundTransparency = 2.000
+			SliderNumber.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderNumber.BorderSizePixel = 0
+			SliderNumber.Position = UDim2.new(0.853717029, 0, 0.122592859, 0)
+			SliderNumber.Size = UDim2.new(0, 47, 0, 22)
+			SliderNumber.Font = Enum.Font.GothamBold
+			SliderNumber.Text = tostring(start and math.floor((start / max) * (max - min) + min) or 0)
+
+			SliderNumber.TextColor3 = Color3.fromRGB(255, 255, 255)
+			SliderNumber.TextSize = 14.000
+			SliderNumber.TextTransparency = 2
+
+			TextBoxLabelGradient_4.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 205, 89)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 128, 42))}
+			TextBoxLabelGradient_4.Name = "adddadad"
+			TextBoxLabelGradient_4.Parent = SliderNumber
+			
+			PageScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, PageListLayout.AbsoluteContentSize.Y)
+
+			local function move(input)
+				local pos =UDim2.new(math.clamp((input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X, 0, 1),-6,-0.644999981,0)
+				local pos1 =UDim2.new(math.clamp((input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X, 0, 1),0,0,14)
+				TweenService:Create(SliderLine,TweenInfo.new(0.25),{Size = pos1}):Play()
+
+				local value = math.floor(((pos.X.Scale * max) / max) * (max - min) + min)
+				SliderNumber.Text = tostring(value)
+				pcall(callback, value)
+			end
+			
+			SliderButton.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 0}):Play()
+				end
+			end)
+			
+			SliderButton.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = false
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 2}):Play()
+				end
+			end)
+			
+			game:GetService("UserInputService").InputChanged:Connect(function(input)
+				if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+					move(input)
+				end
+			end)
+			
+			pcall(callback, SliderNumber.Text)
+
+			function SliderFunc:Change(tochange)
+				if tonumber(tochange) > max then
+					tochange = max
+					local pos = UDim2.new((tochange or 0) / max, 0, 0, 14)
+					TweenService:Create(SliderLine,TweenInfo.new(0.25),{Size = pos}):Play()
+					SliderNumber.Text = tostring(tochange)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 0}):Play()
+					wait(0.50)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 2}):Play()
+					pcall(callback, tochange)
+				elseif tonumber(tochange) < min then
+					tochange = min
+					TweenService:Create(SliderLine,TweenInfo.new(0.25),{Size = UDim2.new(0,0,0,14)}):Play()
+					SliderNumber.Text = tostring(tochange)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 0}):Play()
+					wait(0.50)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 2}):Play()
+					pcall(callback, tochange)
+				else
+					local pos = UDim2.new((tochange or 0) / max, 0, 0, 14)
+					TweenService:Create(SliderLine,TweenInfo.new(0.25),{Size = pos}):Play()
+					SliderNumber.Text = tostring(tochange)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 0}):Play()
+					wait(0.50)
+					TweenService:Create(SliderNumber,TweenInfo.new(0.25),{TextTransparency = 2}):Play()
+					pcall(callback, tochange)
+				end
+			end
+			return SliderFunc
+		end
+		return uilib_page
+	end
+	return uilib_tab
+end
